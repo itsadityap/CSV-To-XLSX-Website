@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Files</title>
+    <style>
+        h1{
+            display: flex;
+            margin-left: 580px;
+        }
+        body 
+        {   
+            align-self: start;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.5rem;
+            background-color: #333;
+            color: whitesmoke;
+        }
+        button 
+        {
+            font: inherit;
+            width: max-content;
+        }
+        form 
+        {
+            display: flex;
+            flex-flow: column nowrap;
+            gap: 1.5rem;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 classname = 'Heading'>CSV To XLS</h1>
+    <form id="uploadForm" method="post" action="/operation">
+        <input type="file" id="myFiles" />
+        <button type="submit" id="submit">Submit</button>
+    </form>
+    <h2></h2>
+    <h3></h3>
+    <script>
+        const form = document.getElementById('uploadForm')
+
+        const sendFiles = async () => {
+
+            const myFiles = document.getElementById('myFiles').files
+
+            const formData = new FormData()
+
+            Object.keys(myFiles).forEach(key => {
+                formData.append(myFiles.item(key).name, myFiles.item(key))
+            })
+
+            const response = await fetch('http://localhost:3000/upload', {
+                method: 'POST',
+                body: formData
+            })
+
+            const jsondata = await response.json()
+
+            const h2 = document.querySelector('h2')
+            h2.textContent = `Status: ${jsondata?.status}`
+
+            const h3 = document.querySelector('h3')
+            h3.textContent = jsondata?.message
+
+            console.log(jsondata)
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault()
+            sendFiles()
+        })
+    </script>
+</body>
+
+</html>
