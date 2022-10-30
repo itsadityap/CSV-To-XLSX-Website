@@ -7,9 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Files</title>
     <style>
+        h3{
+            margin-top: 250px;
+            margin-left: 450px;
+        }
         h1{
             display: flex;
-            margin-left: 580px;
+            margin-left: 400px;
         }
         body 
         {   
@@ -35,13 +39,18 @@
 </head>
 
 <body>
-    <h1 classname = 'Heading'>CSV To XLS</h1>
-    <form id="uploadForm" method="post" action="/operation">
+    <h1 classname = 'Heading'>Upload Your CSV File Here ⬇️</h1>
+    <form id="uploadForm" method="post" action="/download">
         <input type="file" id="myFiles" />
         <button type="submit" id="submit">Submit</button>
     </form>
     <h2></h2>
-    <h3></h3>
+    <h4></h4>
+
+    <h3>Click the Button to Download your Excel File</h3>
+    <form id="uploadForm" method="post" action="/donwloads">
+        <button type="submit" id="submit">Click To Download</button>
+    </form>
     <script>
         const form = document.getElementById('uploadForm')
 
@@ -55,6 +64,7 @@
                 formData.append(myFiles.item(key).name, myFiles.item(key))
             })
 
+
             const response = await fetch('http://localhost:3000/upload', {
                 method: 'POST',
                 body: formData
@@ -65,9 +75,9 @@
             const h2 = document.querySelector('h2')
             h2.textContent = `Status: ${jsondata?.status}`
 
-            const h3 = document.querySelector('h3')
-            h3.textContent = jsondata?.message
-
+            const h4 = document.querySelector('h4')
+            h4.textContent = jsondata?.message
+            
             console.log(jsondata)
         }
 

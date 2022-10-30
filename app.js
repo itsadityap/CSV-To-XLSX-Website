@@ -4,7 +4,8 @@ const path = require("path");
 const filesPayloadExists = require('./middleware/filesPayloadExists');
 const fs = require('fs');
 const csvtojson = require('csvtojson');
-const XLSX = require('xlsx')
+const XLSX = require('xlsx');
+const fileExtLimiter = require("./middleware/fileExtLimiter");
 
 const PORT = process.env.PORT || 3000;
 
@@ -16,11 +17,6 @@ app.get("/", (req,res) =>
     res.sendFile(path.join(__dirname, "index.html"));
 })
 
-app.get("/download", (req,res) => {
-    res.sendFile(path.join(__dirname, "Download.html"))
-})
-
-
 //FUNCTIONS
 const ReadCSV = async () => {
 
@@ -29,7 +25,6 @@ const ReadCSV = async () => {
     .fromFile(csvfilepath)
     .then((json) => {
         fs.writeFileSync('./files/op.json', JSON.stringify(json));
-        //console.log(json);
     })
     .catch((err) => {console.log(err)})
 }
@@ -91,26 +86,51 @@ const JSONToExcel = () => {
 
     XLSX.writeFile(workBook, "Data.xlsx")
 
-    setTimeout(DeleteFileExcel,5000)
 }
+
+// const DeleteFileOP = async () => 
+// {
+//     try 
+//     {
+//         fs.unlinkSync("./files/op.json")
+//         console.log("JSON File is Deleted");
+//     }
+//     catch(err)
+//     {
+//         console.log("Cannot Delete File Doesn't Exist");
+//     }
+// }
 
 const DeleteFileExcel = async () => 
 {
     try 
     {
-        fs.unlinkSync('Data.xlsx')
+        fs.unlinkSync("Data.xlsx")
         console.log("File is Deleted");
     }
     catch(err)
     {
-        console.log(err);
+        console.log("Cannot Delete File Doesn't Exist");
     }
 }
 
+const DeleteFileCSV = async () => 
+{
+    try 
+    {
+        fs.unlinkSync("./files/sales_data_sample.csv")
+        console.log("CSV File Deleted");
+    }
+    catch(err)
+    {
+        console.log("Cannot Delete File Doesn't Exist");
+    }
+}
 
 //POST ROUTES
 app.post('/upload',
         fileUpload({ createParentPath: true }),
+        fileExtLimiter(['.csv']),
         filesPayloadExists,
         (req, res) => {
             const files = req.files
@@ -128,16 +148,13 @@ app.post('/upload',
             JSONToSpecificJSON()
 
             JSONToExcel()
-            
-            //res.redirect("/downlaod")
-            
-            return res.json({ status: 'success', message: Object.keys(files).toString() })
-            
-            //return res.redirect("/download")
-        }
-    )
 
-    app.post("/donwload", (req,res) => {
+            return res.json({ status: 'success', message: Object.keys(files).toString() })
+            //res.redirect('/download')
+    }
+)
+
+app.post("/donwloads", (req,res) => {
 
         const filePath = 'Data.xlsx' 
 
@@ -153,7 +170,10 @@ app.post('/upload',
                     })
                 }
         });
-
-    })
+        
+        setTimeout(DeleteFileExcel,8000)
+        //setTimeout(DeleteFileOP,9000)
+        setTimeout(DeleteFileCSV,10000)
+})
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
